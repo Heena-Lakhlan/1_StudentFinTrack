@@ -1,0 +1,27 @@
+{
+  "name": "studentfintrack",
+  "version": "3.0.0",
+  "description": "StudentFinTrack - Plain CSS, light mode only",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "jest --runInBand"
+  },
+  "author": "StudentFinTrack",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-session": "^1.17.3"
+  },
+  "devDependencies": {
+    "jest": "^29.6.1",
+    "jsdom": "^21.1.0",
+    "supertest": "^6.4.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testPathIgnorePatterns": ["/node_modules/"],
+    "verbose": true
+  }
+}

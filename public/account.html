@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Account — StudentFinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <div class="row">
+      <div class="box" style="flex:1 1 100%">
+        <h2>Profile</h2>
+        <form id="profileForm" class="row">
+          <div class="box" style="flex:1 1 320px; display:flex; gap:12px; align-items:center">
+            <img id="avatarImg" src="" alt="avatar" style="width:72px;height:72px;border-radius:50%;border:1px solid #cbd5e1;object-fit:cover;background:#e5e7eb">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <label class="text-muted">Upload avatar</label>
+              <input id="avatarFile" type="file" accept="image/*">
+            </div>
+          </div>
+          <div class="box" style="flex:1 1 320px">
+            <label>Name</label>
+            <input id="name" type="text" class="input" required>
+          </div>
+          <div class="box" style="flex:1 1 320px">
+            <label>Email (read-only)</label>
+            <input id="email" type="email" class="input" disabled>
+          </div>
+          <div class="box" style="flex:1 1 100%; display:flex; justify-content:flex-end">
+            <button class="btn">Save changes</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="box" style="flex:1 1 100%">
+        <h2>Change Password</h2>
+        <form id="pwdForm" class="row">
+          <div class="box" style="flex:1 1 280px">
+            <label>Current Password</label>
+            <input id="curPwd" type="password" class="input" required>
+          </div>
+          <div class="box" style="flex:1 1 280px">
+            <label>New Password</label>
+            <input id="newPwd" type="password" class="input" required>
+          </div>
+          <div class="box" style="flex:1 1 100%; display:flex; justify-content:flex-end">
+            <button class="btn-secondary">Update Password</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="box" style="flex:1 1 100%">
+        <h2>Logout</h2>
+        <div style="display:flex;justify-content:flex-end">
+          <button id="logoutBtn2" class="btn-secondary">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/account.js"></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shared — StudentFinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <div class="row">
+      <div class="box" style="flex:1 1 100%; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap">
+        <h2>Shared Expenses</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <button id="manageFriendsBtn" class="btn-secondary">Manage Friends</button>
+          <button id="addSharedBtn" class="btn">Add Split Expense</button>
+        </div>
+      </div>
+
+      <div class="box" style="flex:1 1 100%">
+        <h3>Group Expenses</h3>
+        <div id="sharedList" class="row"></div>
+      </div>
+
+      <div class="box" style="flex:1 1 100%">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+          <h3>Settlement Suggestions</h3>
+          <button id="recalcBtn" class="btn-secondary">Recalculate</button>
+        </div>
+        <div id="settlements" class="row"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalRoot"></div>
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/shared.js"></script>
+</body>
+</html>

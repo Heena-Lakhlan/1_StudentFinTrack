@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Transaction — StudentFinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <div class="row">
+      <div class="box" style="flex:1 1 100%; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap">
+        <h2>Transactions</h2>
+        <button id="addTxBtn" class="btn">Add Transaction</button>
+      </div>
+
+      <div id="txList" class="row" style="flex:1 1 100%"></div>
+    </div>
+  </div>
+
+  <div id="modalRoot"></div>
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/transactions.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>StudentFinTrack — Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- No navbar on login -->
+
+  <div class="container">
+    <div class="row">
+      <!-- Intro text box -->
+      <div class="box" style="flex:1 1 100%">
+        <h1>Welcome to StudentFinTrack</h1>
+        <p class="text-muted">Track your spending, set budgets, split shared expenses, set savings goals, and analyze trends—all in one place.</p>
+      </div>
+
+      <!-- Login form box -->
+      <div class="box" style="flex:1 1 420px">
+        <h2>Log In</h2>
+        <form id="loginForm" class="row">
+          <div class="box" style="flex:1 1 100%">
+            <label>Email</label>
+            <input id="email" type="email" class="input" placeholder="you@example.com" required>
+          </div>
+          <div class="box" style="flex:1 1 100%">
+            <label>Password</label>
+            <input id="password" type="password" class="input" placeholder="••••••••" required>
+          </div>
+          <div class="box" style="flex:1 1 100%; display:flex; gap:8px; align-items:center; justify-content:space-between">
+            <a href="forgot.html" class="text-muted">Forgot password?</a>
+            <div style="display:flex; gap:8px">
+              <button type="button" class="btn-secondary" id="demoBtn">Try Demo</button>
+              <button type="submit" class="btn">Log In</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tips box -->
+      <div class="box" style="flex:1 1 300px">
+        <h3>How it works</h3>
+        <ul style="margin:0;padding-left:18px">
+          <li>Log in (or use the demo).</li>
+          <li>Start at the Dashboard (empty states).</li>
+          <li>Add transactions and set budgets.</li>
+          <li>Explore Savings, Shared, and Analytics.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalRoot"></div>
+  <script src="js/common.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

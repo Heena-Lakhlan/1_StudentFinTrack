@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Analytics — StudentFinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="assets/logo.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="container">
+    <div class="row">
+      <!-- Filters -->
+      <div class="box" style="flex:1 1 100%">
+        <h2>Filters</h2>
+        <div class="row">
+          <div class="box" style="flex:1 1 220px">
+            <label>Time Range</label>
+            <select id="rangeSelect" class="input">
+              <option value="last7">Last 7 days</option>
+              <option value="thisMonth">This month</option>
+              <option value="lastMonth">Last month</option>
+              <option value="thisYear">This year</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div class="box" style="flex:1 1 200px">
+            <label>Start</label>
+            <input id="startDate" type="date" class="input">
+          </div>
+          <div class="box" style="flex:1 1 200px">
+            <label>End</label>
+            <input id="endDate" type="date" class="input">
+          </div>
+          <div class="box" style="flex:1 1 220px">
+            <label>Category</label>
+            <select id="catSelect" class="input">
+              <!-- populated by JS -->
+            </select>
+          </div>
+          <div class="box" style="flex:1 1 240px">
+            <label class="text-muted">Splits</label>
+            <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+              <label><input id="splitByFriend" type="checkbox"> Split by friend</label>
+              <label><input id="splitByCategory" type="checkbox" checked> Split by category</label>
+            </div>
+          </div>
+          <div class="box" style="flex:1 1 100%; display:flex; justify-content:flex-end">
+            <button id="applyBtn" class="btn">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div id="pieSection" class="box" style="flex:1 1 360px">
+        <h3>Spending by Category</h3>
+        <canvas id="vizPie" class="chart"></canvas>
+      </div>
+      <div class="box" style="flex:1 1 480px">
+        <h3>Spending Trend</h3>
+        <canvas id="vizLine" class="chart"></canvas>
+      </div>
+      <div id="barSection" class="box" style="flex:1 1 480px">
+        <h3>Shared by Friend</h3>
+        <canvas id="vizBar" class="chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/analytics.js"></script>
+</body>
+</html>
