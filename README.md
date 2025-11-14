@@ -1,5 +1,7 @@
 # StudentFinTrack
 
+[![CI](https://github.com/Heena-Lakhlan/1_StudentFinTrack/actions/workflows/nodejs.yml/badge.svg?branch=main)](https://github.com/Heena-Lakhlan/1_StudentFinTrack/actions)
+
 This repository contains the StudentFinTrack demo web application. It is a vanilla HTML/CSS/JS multi-page app that stores data in the browser LocalStorage. A minimal Express server is included for serving static files and providing demo auth endpoints.
 
 Quick setup
