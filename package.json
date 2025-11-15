@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "test:e2e": "playwright test"
   },
   "author": "StudentFinTrack",
   "license": "MIT",
@@ -18,7 +19,9 @@
     "jest": "^29.6.1",
     "jsdom": "^21.1.0",
     "supertest": "^6.3.3",
-    "jest-environment-jsdom": "^29.6.1"
+    "jest-environment-jsdom": "^29.6.1",
+    "playwright": "^1.40.0",
+    "@playwright/test": "^1.40.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
