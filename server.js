@@ -43,6 +43,13 @@ app.get('/api/me', (req, res) => {
   res.json({ ok: true, user: req.session.user });
 });
 
+// Example protected data endpoint used by integration tests and to demo server-driven APIs
+app.get('/api/protected', (req, res) => {
+  if (!req.session || !req.session.user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
+  // Return some demo JSON payload
+  res.json({ ok: true, data: { secret: 'this-is-protected', timestamp: Date.now() } });
+});
+
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
