@@ -8,6 +8,14 @@ const session = require('express-session');
 const path = require('path');
 
 const app = express();
+// Prisma client
+let prisma;
+try {
+  prisma = require('./server/db');
+} catch (e) {
+  // prisma might not be installed in environments where we only run frontend tests
+  prisma = null;
+}
 
 // Demo in-memory users for optional session endpoints (not required for front-end functionality)
 const users = [
@@ -29,7 +37,11 @@ app.post('/api/login', (req, res) => {
   const { email, password } = req.body || {};
   const u = users.find(x => x.email === (email || '').toLowerCase() && x.password === password);
   if (!u) return res.status(401).json({ ok: false, message: 'Invalid credentials' });
+  // set session user (keep backward-compatibility with LocalStorage demo flows)
   req.session.user = { email: u.email, name: u.name };
+  // also set helper fields used by Prisma-backed endpoints
+  req.session.userEmail = u.email;
+  req.session.userName = u.name;
   res.json({ ok: true, user: req.session.user });
 });
 
@@ -49,6 +61,90 @@ app.get('/api/protected', (req, res) => {
   // Return some demo JSON payload
   res.json({ ok: true, data: { secret: 'this-is-protected', timestamp: Date.now() } });
 });
+
+// Helper to fetch (or create) a Prisma user record from session
+async function getUserFromSession(req) {
+  if (!prisma) return null;
+  const email = req.session?.userEmail || req.session?.user?.email;
+  const name = req.session?.userName || req.session?.user?.name;
+  if (!email) return null;
+  let user = await prisma.user.findUnique({ where: { email } });
+  if (!user) {
+    user = await prisma.user.create({ data: { email, name } });
+  }
+  return user;
+}
+
+// Transactions CRUD (server-backed). These endpoints are only active when Prisma is available.
+if (prisma) {
+  app.get('/api/transactions', async (req, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
+      const { start, end } = req.query;
+      const where = { userId: user.id };
+      if (start || end) {
+        where.date = {};
+        if (start) where.date.gte = new Date(start);
+        if (end) where.date.lte = new Date(end);
+      }
+      const txs = await prisma.transaction.findMany({ where, orderBy: { date: 'desc' } });
+      res.json({ ok: true, data: txs });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ ok: false, message: 'Server error' });
+    }
+  });
+
+  app.post('/api/transactions', async (req, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
+      const { amount, date, category, description } = req.body || {};
+      if (amount == null || !date || !category) return res.status(400).json({ ok: false, message: 'Missing fields' });
+      const tx = await prisma.transaction.create({ data: { userId: user.id, amount: Number(amount), date: new Date(date), category, description: description || '' } });
+      res.status(201).json({ ok: true, tx });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ ok: false, message: 'Server error' });
+    }
+  });
+
+  app.put('/api/transactions/:id', async (req, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
+      const id = Number(req.params.id);
+      const existing = await prisma.transaction.findUnique({ where: { id } });
+      if (!existing || existing.userId !== user.id) return res.status(404).json({ ok: false, message: 'Not found' });
+      const data = {};
+      if (req.body.amount != null) data.amount = Number(req.body.amount);
+      if (req.body.date) data.date = new Date(req.body.date);
+      if (req.body.category) data.category = req.body.category;
+      if (req.body.description != null) data.description = req.body.description;
+      const updated = await prisma.transaction.update({ where: { id }, data });
+      res.json({ ok: true, tx: updated });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ ok: false, message: 'Server error' });
+    }
+  });
+
+  app.delete('/api/transactions/:id', async (req, res) => {
+    try {
+      const user = await getUserFromSession(req);
+      if (!user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
+      const id = Number(req.params.id);
+      const existing = await prisma.transaction.findUnique({ where: { id } });
+      if (!existing || existing.userId !== user.id) return res.status(404).json({ ok: false, message: 'Not found' });
+      await prisma.transaction.delete({ where: { id } });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ ok: false, message: 'Server error' });
+    }
+  });
+}
 
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));

@@ -7,13 +7,18 @@
     "start": "node server.js",
     "dev": "node server.js",
     "test": "jest --runInBand",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "db:reset": "prisma migrate reset --force"
   },
   "author": "StudentFinTrack",
   "license": "MIT",
   "dependencies": {
     "express": "^4.19.2",
-    "express-session": "^1.17.3"
+    "express-session": "^1.17.3",
+    "@prisma/client": "^5.8.0",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "jest": "^29.6.1",
@@ -21,7 +26,8 @@
     "supertest": "^6.3.3",
     "jest-environment-jsdom": "^29.6.1",
     "playwright": "^1.40.0",
-    "@playwright/test": "^1.40.0"
+    "@playwright/test": "^1.40.0",
+    "prisma": "^5.8.0"
   },
   "jest": {
     "testEnvironment": "jsdom",
