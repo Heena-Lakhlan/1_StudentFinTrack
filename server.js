@@ -25,8 +25,23 @@ const users = [
 ];
 
 app.use(express.json());
+// Try to use a persistent file-backed session store when available. This
+// improves demo / CI behavior and avoids in-memory sessions being lost when
+// the server process restarts. If `session-file-store` is not installed the
+// code will fall back to the default in-memory store.
+let sessionStore = null;
+try {
+  const FileStoreFactory = require('session-file-store');
+  const FileStore = FileStoreFactory(session);
+  sessionStore = new FileStore({ path: path.join(__dirname, 'sessions'), retries: 1 });
+} catch (e) {
+  // session-file-store not installed or available; fall back to MemoryStore
+  sessionStore = null;
+}
+
 app.use(session({
-  secret: 'sft_local_secret_change_me',
+  store: sessionStore || undefined,
+  secret: process.env.SESSION_SECRET || 'sft_local_secret_change_me',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false }

@@ -94,3 +94,14 @@ Notes
 - CI already runs `npx prisma db push` and `node prisma/seed.js` before both unit tests and Playwright e2e so the GitHub Actions environment will have the schema and seed applied.
 - The client contains an idempotent `migrateLocalToServer()` helper (in `public/js/data.js`) that will POST LocalStorage transactions to `/api/transactions` after a successful server login (see `public/js/auth.js`). The app will continue to work offline using LocalStorage as a fallback.
 - For production usage replace the in-memory session store with a persistent session store (Redis / DB-backed). This demo keeps an in-memory store for simplicity.
+ - The demo server will now use a file-backed session store when the `session-file-store` package is installed. This stores session files under the `sessions/` directory and is a lightweight option for development or small demos.
+	 - To enable persistent sessions locally, install dependencies (already included in package.json) and set a secret if you prefer:
+
+```powershell
+npm install
+# optional: export a secret
+$env:SESSION_SECRET = 'change-me-to-a-strong-secret'
+node server.js
+```
+
+Note: For production use a networked store such as Redis (via `connect-redis`) or a database-backed store.
