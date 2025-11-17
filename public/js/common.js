@@ -231,3 +231,41 @@ function openAddTxModal(onSaved) {
 
 // Initialize guard on DOM ready for protected pages
 document.addEventListener('DOMContentLoaded', requireAuth);
+
+// Simple global network indicator (listens to sft:net events from data layer)
+(function initNetworkIndicator() {
+  let overlay = null;
+  function ensure() {
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'sftBusy';
+      overlay.style = 'position:fixed;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999;';
+      overlay.innerHTML = '<div style="background:rgba(0,0,0,0.6);color:white;padding:12px 18px;border-radius:8px;pointer-events:auto;">Saving…</div>';
+      document.body.appendChild(overlay);
+      overlay.style.display = 'none';
+    }
+    return overlay;
+  }
+
+  let pending = 0;
+  document.addEventListener('sft:net:start', () => {
+    pending++;
+    const el = ensure();
+    el.style.display = 'flex';
+  });
+  document.addEventListener('sft:net:done', () => {
+    pending = Math.max(0, pending - 1);
+    if (pending === 0 && document.getElementById('sftBusy')) document.getElementById('sftBusy').style.display = 'none';
+  });
+  document.addEventListener('sft:net:error', (e) => {
+    pending = Math.max(0, pending - 1);
+    // show briefly an error toast
+    const detail = e?.detail || {};
+    const toast = document.createElement('div');
+    toast.style = 'position:fixed;right:16px;bottom:16px;background:#b91c1c;color:white;padding:8px 12px;border-radius:6px;z-index:10000';
+    toast.textContent = 'Network error — changes saved locally';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+    if (pending === 0 && document.getElementById('sftBusy')) document.getElementById('sftBusy').style.display = 'none';
+  });
+})();

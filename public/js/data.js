@@ -33,8 +33,28 @@ const SFT = (() => {
   }
   function addTransaction(tx) {
     const list = getTransactions();
-    list.push({ ...tx, id: tx.id || `${Date.now()}_${Math.random().toString(36).slice(2)}` });
+    const id = tx.id || `${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const entry = { ...tx, id };
+    list.push(entry);
     saveTransactions(list);
+    // Notify UI that a network attempt will start
+    try { document.dispatchEvent(new CustomEvent('sft:net:start', { detail: { op: 'add', tx: entry } })); } catch (e) {}
+    // Try to persist to server in background; fall back silently
+    (async () => {
+      try {
+        await fetch('/api/transactions', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: Number(tx.amount), date: tx.date, category: tx.category, description: tx.description || '' })
+        });
+        try { document.dispatchEvent(new CustomEvent('sft:net:done', { detail: { op: 'add', tx: entry } })); } catch (e) {}
+      } catch (e) {
+        try { document.dispatchEvent(new CustomEvent('sft:net:error', { detail: { op: 'add', tx: entry, error: e } })); } catch (err) {}
+        // ignore - offline or server not available
+      }
+    })();
+    return entry;
   }
   function updateTransaction(id, patch) {
     const list = getTransactions();
@@ -42,10 +62,29 @@ const SFT = (() => {
     if (i >= 0) {
       list[i] = { ...list[i], ...patch };
       saveTransactions(list);
+      try { document.dispatchEvent(new CustomEvent('sft:net:start', { detail: { op: 'update', id, patch } })); } catch (e) {}
+      (async () => {
+        try {
+          await fetch('/api/transactions/' + id, {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(patch)
+          });
+          try { document.dispatchEvent(new CustomEvent('sft:net:done', { detail: { op: 'update', id, patch } })); } catch (e) {}
+        } catch (e) { try { document.dispatchEvent(new CustomEvent('sft:net:error', { detail: { op: 'update', id, patch, error: e } })); } catch (err) {} }
+      })();
     }
   }
   function deleteTransaction(id) {
     saveTransactions(getTransactions().filter(t => t.id !== id));
+    try { document.dispatchEvent(new CustomEvent('sft:net:start', { detail: { op: 'delete', id } })); } catch (e) {}
+    (async () => {
+      try {
+        await fetch('/api/transactions/' + id, { method: 'DELETE', credentials: 'same-origin' });
+        try { document.dispatchEvent(new CustomEvent('sft:net:done', { detail: { op: 'delete', id } })); } catch (e) {}
+      } catch (e) { try { document.dispatchEvent(new CustomEvent('sft:net:error', { detail: { op: 'delete', id, error: e } })); } catch (err) {} }
+    })();
   }
   function txBetween(startISO, endISO) {
     return getTransactions().filter(t => t.date >= startISO && t.date <= endISO);
@@ -159,6 +198,28 @@ const SFT = (() => {
       reason: 'Start a $500 emergency fund with small weekly contributions.'
     });
     return sugs;
+  }
+
+  // Migration helper: push LocalStorage transactions to server (idempotent)
+  async function migrateLocalToServer() {
+    if (!window.fetch) return;
+    const txs = getTransactions();
+    if (!txs || !txs.length) return;
+    for (const t of txs) {
+      try {
+        await fetch('/api/transactions', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: Number(t.amount), date: t.date, category: t.category, description: t.description || '' })
+        });
+      } catch (e) {
+        // stop on failure to avoid partial migration
+        return;
+      }
+    }
+    // if all succeeded, clear local transactions
+    try { saveTransactions([]); } catch (e) {}
   }
 
   return {

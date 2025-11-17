@@ -6,6 +6,8 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 // Prisma client
@@ -24,7 +26,15 @@ const users = [
   { email: 'sam@studentfintrack.app', password: 'sam123', name: 'Sam Lee' }
 ];
 
-app.use(express.json());
+// Basic security headers
+app.use(helmet());
+
+// Limit request body size to guard against large payloads
+app.use(express.json({ limit: '10kb' }));
+
+// Simple rate limiter for API routes
+const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
+app.use('/api/', apiLimiter);
 // Try to use a persistent file-backed session store when available. This
 // improves demo / CI behavior and avoids in-memory sessions being lost when
 // the server process restarts. If `session-file-store` is not installed the
@@ -39,12 +49,22 @@ try {
   sessionStore = null;
 }
 
+// Session secret handling: prefer environment variable in non-dev environments
+const sessSecret = process.env.SESSION_SECRET || 'sft_local_secret_change_me';
+if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET is required in production');
+}
+
 app.use(session({
   store: sessionStore || undefined,
-  secret: process.env.SESSION_SECRET || 'sft_local_secret_change_me',
+  secret: sessSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: {
+    secure: (process.env.NODE_ENV === 'production'),
+    httpOnly: true,
+    sameSite: 'lax'
+  }
 }));
 
 // Minimal auth endpoints (front-end works without calling these)
@@ -92,6 +112,14 @@ async function getUserFromSession(req) {
 
 // Transactions CRUD (server-backed). These endpoints are only active when Prisma is available.
 if (prisma) {
+  // Small helper to validate transaction payloads
+  function validateTxPayload(body) {
+    const errors = [];
+    if (body.amount == null || Number.isNaN(Number(body.amount)) || Number(body.amount) <= 0) errors.push('amount');
+    if (!body.date) errors.push('date');
+    if (!body.category) errors.push('category');
+    return errors;
+  }
   app.get('/api/transactions', async (req, res) => {
     try {
       const user = await getUserFromSession(req);
@@ -116,7 +144,8 @@ if (prisma) {
       const user = await getUserFromSession(req);
       if (!user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
       const { amount, date, category, description } = req.body || {};
-      if (amount == null || !date || !category) return res.status(400).json({ ok: false, message: 'Missing fields' });
+      const errs = validateTxPayload(req.body || {});
+      if (errs.length) return res.status(400).json({ ok: false, message: 'Invalid fields', fields: errs });
       const tx = await prisma.transaction.create({ data: { userId: user.id, amount: Number(amount), date: new Date(date), category, description: description || '' } });
       res.status(201).json({ ok: true, tx });
     } catch (err) {
@@ -137,6 +166,8 @@ if (prisma) {
       if (req.body.date) data.date = new Date(req.body.date);
       if (req.body.category) data.category = req.body.category;
       if (req.body.description != null) data.description = req.body.description;
+      // If amount or date or category present, validate basics
+      if (Object.keys(data).length === 0) return res.status(400).json({ ok: false, message: 'No fields to update' });
       const updated = await prisma.transaction.update({ where: { id }, data });
       res.json({ ok: true, tx: updated });
     } catch (err) {

@@ -6,3 +6,8 @@ dist/
 npm-debug.log*
 .idea/
 *.local
+
+# Ignore runtime artifacts
+sessions/
+dev.db
+*.db
