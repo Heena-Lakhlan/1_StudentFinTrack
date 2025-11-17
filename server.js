@@ -37,6 +37,12 @@ app.post('/api/logout', (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
+// Protected endpoint to return current session user (for integration tests / API-driven auth)
+app.get('/api/me', (req, res) => {
+  if (!req.session || !req.session.user) return res.status(401).json({ ok: false, message: 'Unauthenticated' });
+  res.json({ ok: true, user: req.session.user });
+});
+
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));
 
