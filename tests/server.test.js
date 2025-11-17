@@ -22,6 +22,23 @@ describe('Server endpoints', () => {
     expect(res.body.user).toHaveProperty('email', 'demo@studentfintrack.app');
   });
 
+  test('invalid credentials return 401', async () => {
+    const res = await request(app)
+      .post('/api/login')
+      .send({ email: 'noone@example.com', password: 'wrong' })
+      .set('Accept', 'application/json');
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('ok', false);
+    expect(res.body).toHaveProperty('message');
+  });
+
+  test('protected /api/me unauthorized without session', async () => {
+    const res = await request(app).get('/api/me');
+    expect(res.statusCode).toBe(401);
+    expect(res.body).toHaveProperty('ok', false);
+  });
+
   test('session persists via agent and logout clears session', async () => {
     const agent = request.agent(app);
 
