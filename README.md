@@ -47,3 +47,50 @@ Notes
 
 - Tests use Jest with the jsdom environment for browser-like tests and supertest for server integration tests.
 - The app stores data in LocalStorage and will work without the server if you open `public/index.html` directly.
+
+Prisma / Local SQLite (server-driven transactions)
+----------------------------------------------
+
+This project includes a small server-backed data layer using Prisma + SQLite to persist transactions for the demo user. The setup below is useful for local development and CI (no cloud services required).
+
+1. Install dependencies (PowerShell):
+
+```powershell
+npm install
+```
+
+2. Generate Prisma client:
+
+```powershell
+npx prisma generate
+```
+
+3. Apply the schema to the local SQLite file and create `dev.db`:
+
+```powershell
+npx prisma db push --accept-data-loss
+```
+
+4. Seed the demo user (required so server endpoints accept demo login):
+
+```powershell
+node prisma/seed.js
+```
+
+5. Run the test suite (Jest) and E2E (Playwright):
+
+```powershell
+npm test           # runs Jest unit/integration tests
+npm run test:e2e   # runs Playwright E2E (will start server.js automatically)
+```
+
+6. Reset DB (if needed):
+
+```powershell
+npm run db:reset
+```
+
+Notes
+- CI already runs `npx prisma db push` and `node prisma/seed.js` before both unit tests and Playwright e2e so the GitHub Actions environment will have the schema and seed applied.
+- The client contains an idempotent `migrateLocalToServer()` helper (in `public/js/data.js`) that will POST LocalStorage transactions to `/api/transactions` after a successful server login (see `public/js/auth.js`). The app will continue to work offline using LocalStorage as a fallback.
+- For production usage replace the in-memory session store with a persistent session store (Redis / DB-backed). This demo keeps an in-memory store for simplicity.
